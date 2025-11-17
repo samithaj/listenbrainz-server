@@ -25,6 +25,8 @@ from listenbrainz.domain.librefm import LibrefmService
 from listenbrainz.domain.musicbrainz import MusicBrainzService
 from listenbrainz.domain.soundcloud import SoundCloudService
 from listenbrainz.domain.spotify import SpotifyService, SPOTIFY_LISTEN_PERMISSIONS, SPOTIFY_IMPORT_PERMISSIONS
+from listenbrainz.domain.tidal import TidalService
+from listenbrainz.domain.youtube_music import YoutubeMusicService
 from listenbrainz.webserver import db_conn, ts_conn
 from listenbrainz.webserver.decorators import web_listenstore_needed
 from listenbrainz.webserver.errors import APIServiceUnavailable, APINotFound, APIForbidden, APIInternalServerError, \
@@ -188,6 +190,10 @@ def _get_service_or_raise_404(name: str, include_mb=False, exclude_apple=False, 
             return FunkwhaleService()
         elif not exclude_navidrome and service == ExternalServiceType.NAVIDROME:
             return NavidromeService()
+        elif service == ExternalServiceType.TIDAL:
+            return TidalService()
+        elif service == ExternalServiceType.YOUTUBE_MUSIC:
+            return YoutubeMusicService()
     except KeyError:
         raise NotFound("Service %s is invalid." % (name,))
 
@@ -237,6 +243,14 @@ def music_services_details():
     navidrome_connection = navidrome_service.get_user(current_user.id, include_token=False)
     current_navidrome_permissions = "listen" if navidrome_connection else "disable"
 
+    tidal_service = TidalService()
+    tidal_user = tidal_service.get_user(current_user.id)
+    current_tidal_permissions = "listen" if tidal_user else "disable"
+
+    youtube_music_service = YoutubeMusicService()
+    youtube_music_user = youtube_music_service.get_user(current_user.id)
+    current_youtube_music_permissions = "listen" if youtube_music_user else "disable"
+
     data: dict[str, Any] = {
         "current_spotify_permissions": current_spotify_permissions,
         "current_critiquebrainz_permissions": current_critiquebrainz_permissions,
@@ -247,6 +261,8 @@ def music_services_details():
         "funkwhale_host_urls": funkwhale_host_urls,
         "current_navidrome_permissions": current_navidrome_permissions,
         "current_librefm_permissions": current_librefm_permissions,
+        "current_tidal_permissions": current_tidal_permissions,
+        "current_youtube_music_permissions": current_youtube_music_permissions,
     }
     if lastfm_user:
         data["current_lastfm_settings"] = {
@@ -496,7 +512,7 @@ def music_services_disconnect(service_name: str):
         except Exception as e:
             current_app.logger.error("Error in disconnect_funkwhale: %s", str(e), exc_info=True)
             raise APIInternalServerError("An error occurred while disconnecting from Funkwhale")
-    
+
     if service_name.lower() == 'navidrome':
         # remove all Navidrome tokens for user
         try:
@@ -545,6 +561,16 @@ def music_services_disconnect(service_name: str):
         elif service_name == 'apple':
             service.add_new_user(user_id=current_user.id)
             return jsonify({"success": True})
+        elif service_name == 'tidal':
+            if action == 'listen':
+                return jsonify({"url": service.get_authorize_url(scopes=['r_usr', 'w_usr', 'w_sub'])})
+        elif service_name == 'youtube_music':
+            if action == 'listen':
+                return jsonify({"url": service.get_authorize_url(scopes=[
+                    'https://www.googleapis.com/auth/youtube.readonly',
+                    'https://www.googleapis.com/auth/youtube',
+                    'https://www.googleapis.com/auth/youtubepartner',
+                ])})
 
     raise BadRequest('Invalid action')
 

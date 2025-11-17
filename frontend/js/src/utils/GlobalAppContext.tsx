@@ -14,6 +14,8 @@ export type GlobalAppContextT = {
   navidromeAuth?: NavidromeUser;
   critiquebrainzAuth?: MetaBrainzProjectUser;
   appleAuth?: AppleMusicUser;
+  tidalAuth?: UserToken;
+  youtubeMusicAuth?: UserToken;
   musicbrainzAuth?: MetaBrainzProjectUser & {
     refreshMBToken: () => Promise<string | undefined>;
   };
@@ -35,6 +37,8 @@ export const defaultGlobalContext: GlobalAppContextT = {
   navidromeAuth: undefined,
   appleAuth: {},
   critiquebrainzAuth: {},
+  tidalAuth: undefined,
+  youtubeMusicAuth: undefined,
   musicbrainzAuth: {
     refreshMBToken: async () => {
       return undefined;

@@ -22,6 +22,8 @@ type MusicServicesLoaderData = {
   current_lastfm_permissions: string;
   current_funkwhale_permission: string;
   current_navidrome_permissions: string;
+  current_tidal_permissions: string;
+  current_youtube_music_permissions: string;
   current_lastfm_settings?: {
     external_user_id?: string;
     latest_listened_at?: string;
@@ -60,6 +62,8 @@ export default function MusicServices() {
     funkwhale: loaderData.current_funkwhale_permission,
     navidrome: loaderData.current_navidrome_permissions,
     librefm: loaderData.current_librefm_permissions,
+    tidal: loaderData.current_tidal_permissions,
+    youtubeMusic: loaderData.current_youtube_music_permissions,
   });
 
   const [navidromeIsEditing, setNavidromeIsEditing] = React.useState(false);
@@ -76,8 +80,15 @@ export default function MusicServices() {
     serviceName: string,
     newValue: string
   ) => {
-    try {
-      const fetchUrl = `/settings/music-services/${serviceName}/disconnect/`;
+    try:
+      // Convert camelCase service names to snake_case for backend
+      const serviceNameMap: Record<string, string> = {
+        youtubeMusic: "youtube_music",
+        appleMusic: "apple",
+      };
+      const backendServiceName = serviceNameMap[serviceName] || serviceName;
+
+      const fetchUrl = `/settings/music-services/${backendServiceName}/disconnect/`;
       let fetchBody;
       const fetchHeaders: Record<string, string> = {
         "Content-Type": "application/json",
@@ -920,6 +931,82 @@ export default function MusicServices() {
                 />
               </div>
             </form>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">Tidal</h3>
+          </div>
+          <div className="card-body">
+            <p>
+              Connect to your Tidal account to play music on ListenBrainz.
+              <br />
+              <small>
+                Full length track playback requires a Tidal subscription.
+                <br />
+                Tidal offers high-quality audio streaming including HiFi and Master quality.
+              </small>
+            </p>
+            <br />
+            <div className="music-service-selection">
+              <form>
+                <ServicePermissionButton
+                  service="tidal"
+                  current={permissions.tidal}
+                  value="listen"
+                  title="Play music on ListenBrainz"
+                  details="Play music using Tidal on ListenBrainz."
+                  handlePermissionChange={handlePermissionChange}
+                />
+                <ServicePermissionButton
+                  service="tidal"
+                  current={permissions.tidal}
+                  value="disable"
+                  title="Disable"
+                  details="You won't be able to listen to music on ListenBrainz using Tidal."
+                  handlePermissionChange={handlePermissionChange}
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">YouTube Music</h3>
+          </div>
+          <div className="card-body">
+            <p>
+              Connect to your YouTube Music account to play music on ListenBrainz.
+              <br />
+              <small>
+                Full length track playback requires a YouTube Music subscription.
+                <br />
+                This is separate from the regular YouTube playback option below.
+              </small>
+            </p>
+            <br />
+            <div className="music-service-selection">
+              <form>
+                <ServicePermissionButton
+                  service="youtubeMusic"
+                  current={permissions.youtubeMusic}
+                  value="listen"
+                  title="Play music on ListenBrainz"
+                  details="Play music using YouTube Music on ListenBrainz."
+                  handlePermissionChange={handlePermissionChange}
+                />
+                <ServicePermissionButton
+                  service="youtubeMusic"
+                  current={permissions.youtubeMusic}
+                  value="disable"
+                  title="Disable"
+                  details="You won't be able to listen to music on ListenBrainz using YouTube Music."
+                  handlePermissionChange={handlePermissionChange}
+                />
+              </form>
+            </div>
           </div>
         </div>
 

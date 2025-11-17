@@ -426,6 +426,9 @@ def _register_blueprints(app):
     from listenbrainz.webserver.views.metadata_api import metadata_bp
     app.register_blueprint(metadata_bp, url_prefix=API_PREFIX+'/metadata')
 
+    from listenbrainz.webserver.views.musicmatch_api import musicmatch_api_bp
+    app.register_blueprint(musicmatch_api_bp, url_prefix=API_PREFIX+'/musicmatch/track')
+
     from listenbrainz.webserver.views.user_settings_api import user_settings_api_bp
     app.register_blueprint(user_settings_api_bp, url_prefix=API_PREFIX+'/settings')
 
