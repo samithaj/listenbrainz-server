@@ -7,6 +7,9 @@ export { default as PlaylistSyncSettings } from "./PlaylistSyncSettings";
 export { default as MusicGraph } from "./MusicGraph";
 export { default as GraphControls } from "./GraphControls";
 
+// Playback Components
+export { default as UnifiedPlayer } from "./UnifiedPlayer";
+
 // Re-export types
 export type { PlaylistManagerProps } from "./PlaylistManager";
 export type { PlaylistSyncStatusProps, SyncMapping } from "./PlaylistSyncStatus";
@@ -22,3 +25,4 @@ export type {
   LayoutType,
 } from "./MusicGraph";
 export type { GraphControlsProps } from "./GraphControls";
+export type { UnifiedPlayerProps, PlaybackState } from "./UnifiedPlayer";
